@@ -90,3 +90,12 @@ class TestMathJaxConfig(TestCase):
                 WAGTAIL_POLYMATH={"mathjax_config": {"x": object()}}
             ):
                 pass
+
+    def test_rejects_nan_and_infinity(self):
+        for value in (float("nan"), float("inf"), float("-inf")):
+            with self.subTest(value=value):
+                with self.assertRaises(ImproperlyConfigured):
+                    with override_settings(
+                        WAGTAIL_POLYMATH={"mathjax_config": {"x": value}}
+                    ):
+                        pass

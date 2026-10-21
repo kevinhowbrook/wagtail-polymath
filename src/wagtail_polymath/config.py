@@ -104,7 +104,7 @@ class Settings:
         """The extra MathJax config as JSON, or "" when unset or not using MathJax."""
         if self.engine != "mathjax" or not self.mathjax_config:
             return ""
-        return json.dumps(self.mathjax_config, separators=(",", ":"))
+        return json.dumps(self.mathjax_config, separators=(",", ":"), allow_nan=False)
 
     def setup(self) -> None:
         user_engine = self._user_settings.get("engine", "mathjax")
@@ -129,7 +129,11 @@ class Settings:
                 "WAGTAIL_POLYMATH['mathjax_config'] must be a dict."
             )
         try:
-            json.dumps(mathjax_config)
+            # By default json.dumps writes NaN and Infinity as bare tokens, which
+            # aren't valid JSON. The browser's JSON.parse rejects them, so the
+            # MathJax init and widget scripts would fail before setting
+            # window.MathJax, leaving equations unrendered.
+            json.dumps(mathjax_config, allow_nan=False)
         except (TypeError, ValueError) as error:
             raise ImproperlyConfigured(
                 "WAGTAIL_POLYMATH['mathjax_config'] must be JSON-serialisable."

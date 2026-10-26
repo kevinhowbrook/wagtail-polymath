@@ -53,10 +53,13 @@ class PolymathTextareaWidget(Textarea):
                 )
             )
 
+        widget_attrs = {}
+        if wagtail_polymath_config.fonts_url:
+            widget_attrs["data-fonts-url"] = wagtail_polymath_config.fonts_url
         js = [
             *scripts,
             *[
-                versioned_static(script)
+                Script(versioned_static(script), **widget_attrs)
                 for script in wagtail_polymath_config.widget_media_js
             ],
         ]

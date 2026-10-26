@@ -66,3 +66,25 @@ class TestTemplateTagHelpers(TestCase):
             _build_attributes(lib, defer=True),
             {"crossorigin": "anonymous", "integrity": lib["sri"], "defer": True},
         )
+
+
+class TestScriptsTemplateTagFontsUrl(TestCase):
+    def _init_tag(self):
+        return next(
+            line
+            for line in polymath_scripts().splitlines()
+            if "mathjax_init.js" in line
+        )
+
+    def test_no_fonts_attribute_by_default(self):
+        self.assertNotIn("data-fonts-url", polymath_scripts())
+
+    @override_settings(WAGTAIL_POLYMATH={"fonts_url": "[mathjax]/fonts"})
+    def test_init_script_carries_fonts_url(self):
+        self.assertIn('data-fonts-url="[mathjax]/fonts"', self._init_tag())
+
+    @override_settings(WAGTAIL_POLYMATH={"fonts_url": '/fonts"><script>'})
+    def test_fonts_url_is_escaped(self):
+        self.assertIn(
+            'data-fonts-url="/fonts&quot;&gt;&lt;script&gt;"', self._init_tag()
+        )

@@ -61,3 +61,17 @@ class TestPolymathTextareaWidget(TestCase):
             f'<script src="{CUSTOM_URL}" integrity="{CUSTOM_SRI}" crossorigin="anonymous" defer></script>',
             str(self.widget.media),
         )
+
+
+class TestPolymathTextareaWidgetFontsUrl(TestCase):
+    def test_widget_scripts_have_no_fonts_url_by_default(self):
+        self.assertNotIn("data-fonts-url", str(PolymathTextareaWidget().media))
+
+    @override_settings(WAGTAIL_POLYMATH={"fonts_url": "[mathjax]/fonts"})
+    def test_widget_script_carries_fonts_url(self):
+        widget_tag = next(
+            line
+            for line in str(PolymathTextareaWidget().media).splitlines()
+            if "wagtail_polymath-mathjax-widget.js" in line
+        )
+        self.assertIn('data-fonts-url="[mathjax]/fonts"', widget_tag)

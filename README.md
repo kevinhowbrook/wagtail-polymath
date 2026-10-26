@@ -97,6 +97,7 @@ WAGTAIL_POLYMATH = {
         },
         ...,
     ],
+    "fonts_url": "...",  # Optional. MathJax only. Where MathJax 4 loads its fonts from, see below
 }
 ```
 
@@ -161,6 +162,32 @@ and the one loaded by the `polymath_scripts` template tag.
 Note that if you are using MathJax, the bundled preview JS assumes MathJax's combined `tex-mml-chtml` component and
 its `input/asciimath` loader — if you switch to a different version or build of MathJax, you're responsible for keeping
 it compatible with that configuration.
+
+### MathJax fonts
+
+MathJax 4 loads its fonts from a separate package, and by default it fetches them from jsDelivr, even when you serve
+MathJax itself from somewhere else. To load them from your own copy of the font package (for example
+`@mathjax/mathjax-newcm-font`), set `fonts_url`:
+
+```python
+# settings.py
+WAGTAIL_POLYMATH = {
+    "libraries": [
+        {
+            "url": "https://example.com/mathjax/4.1.3/tex-mml-chtml.js",
+            "sri": "sha256-...",
+        },
+    ],
+    "fonts_url": "https://example.com/mathjax/4.1.3/fonts",
+}
+```
+
+`fonts_url` is the folder that holds the font packages, and MathJax adds the package name (`mathjax-newcm-font`).
+MathJax's `[mathjax]` prefix also works, for a path relative to the MathJax script: `"[mathjax]/fonts"` gives the same
+result as the example above. polymath sets it as MathJax's `loader.paths.fonts`, both for the `MathBlock` live preview
+and wherever you use the `polymath_scripts` template tag.
+
+`fonts_url` is ignored when `engine` is `"katex"`, because KaTeX loads its fonts relative to its stylesheet.
 
 ## Contributing
 

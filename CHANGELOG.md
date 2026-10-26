@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- Added an optional `fonts_url` setting, so MathJax 4 can load its fonts from somewhere other than jsDelivr.
+  See [MathJax fonts](README.md#mathjax-fonts)
+
 ## 2.0.3 (2026-10-15)
 
 - Dropped support for Wagtail < 7.4 (as 7.0 is imminently EOL) ([#30](https://github.com/wagtail-nest/wagtail-polymath/pull/30) @kevinhowbrook)

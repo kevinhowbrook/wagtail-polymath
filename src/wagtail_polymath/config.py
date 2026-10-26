@@ -2,6 +2,7 @@ from typing import Any, NotRequired, TypedDict, cast
 from urllib.parse import urlparse
 
 from django.conf import settings
+from django.core.exceptions import ImproperlyConfigured
 from django.core.signals import setting_changed
 
 
@@ -19,6 +20,7 @@ class EngineDict(TypedDict):
 class UserSettingsDict(TypedDict, total=False):
     libraries: list[LibraryDict]
     engine: NotRequired[str]
+    fonts_url: NotRequired[str]
 
 
 MATHJAX_VERSION = "4.1.3"
@@ -73,6 +75,7 @@ class Settings:
     engine: str = "mathjax"
     libraries_js: list[LibraryDict]
     libraries_css: list[LibraryDict]
+    fonts_url: str = ""
 
     def __init__(self):
         self.setup()
@@ -110,6 +113,14 @@ class Settings:
                 self.libraries_css.append(library)
             else:
                 self.libraries_js.append(library)
+
+        fonts_url = self._user_settings.get("fonts_url") or ""
+        if not isinstance(fonts_url, str):
+            raise ImproperlyConfigured(
+                "WAGTAIL_POLYMATH['fonts_url'] must be a string."
+            )
+        # KaTeX loads its fonts relative to its stylesheet, so it has no fonts setting.
+        self.fonts_url = fonts_url.strip() if self.engine == "mathjax" else ""
 
 
 wagtail_polymath_config = Settings()

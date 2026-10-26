@@ -1,3 +1,4 @@
+from django.core.exceptions import ImproperlyConfigured
 from django.test import TestCase, override_settings
 
 from wagtail_polymath.config import ENGINES, wagtail_polymath_config
@@ -50,3 +51,28 @@ class TestSettings(TestCase):
     )
     def test_mathjax_sri_returns_custom_sri(self):
         self.assertEqual(wagtail_polymath_config.libraries_js[0]["sri"], CUSTOM_SRI)
+
+
+FONTS_URL = "https://cdn.example.com/mathjax/4.1.3/fonts"
+
+
+class TestFontsUrl(TestCase):
+    def test_defaults_to_empty(self):
+        self.assertEqual(wagtail_polymath_config.fonts_url, "")
+
+    @override_settings(WAGTAIL_POLYMATH={"fonts_url": FONTS_URL})
+    def test_reads_setting(self):
+        self.assertEqual(wagtail_polymath_config.fonts_url, FONTS_URL)
+
+    @override_settings(WAGTAIL_POLYMATH={"fonts_url": f"  {FONTS_URL}  "})
+    def test_strips_whitespace(self):
+        self.assertEqual(wagtail_polymath_config.fonts_url, FONTS_URL)
+
+    @override_settings(WAGTAIL_POLYMATH={"engine": "katex", "fonts_url": FONTS_URL})
+    def test_ignored_for_katex(self):
+        self.assertEqual(wagtail_polymath_config.fonts_url, "")
+
+    def test_must_be_a_string(self):
+        with self.assertRaises(ImproperlyConfigured):
+            with override_settings(WAGTAIL_POLYMATH={"fonts_url": ["nope"]}):
+                pass
